@@ -1,0 +1,10 @@
+start server: execute start_server.bat
+
+add row to database:
+	a = Airpolution(latitude=51.956044, longitude=7.633369, data=..., city=..., street=...)
+	db.session.add(a)
+	db.session.commit()
+
+get data from database:
+	Airpolution.query.all() # get all data from Airpolution table
+	Airpolution.query.filter_by(city='Münster')

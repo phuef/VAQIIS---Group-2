@@ -14,4 +14,4 @@ def add():
 
 @app.route('/search')
 def search():
-	pass
+	print(Airpolution.query.all())

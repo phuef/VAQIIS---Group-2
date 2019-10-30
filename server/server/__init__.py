@@ -6,4 +6,4 @@ app.config['SECRET_KEY'] = "c51317ef8101119798a6819d082bfb0c"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///airpolution.db"
 db = SQLAlchemy(app)
 
-from server import routes
+from server import routes # must be the last line in the document

@@ -2,3 +2,5 @@
 \.vscode/
 
 server/server/__pycache__/
+
+start_server_conda.bat

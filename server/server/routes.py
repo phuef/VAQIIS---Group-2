@@ -5,7 +5,7 @@ from flask import redirect, render_template, request, url_for
 from server import app, db
 
 from .model import Airpolution
-from .tools import model_to_json
+from .tools import model_to_json, log_data_to_file
 
 
 @app.route("/")
@@ -13,8 +13,8 @@ def index():
     return "Hello"
 
 
-@app.route("/add", methods=["POST"])
-def add():
+@app.route("/add_to_database", methods=["POST"])
+def add_to_database():
     data_point = Airpolution(
         longitude=7.87345867, latitude=51.834568, data=0.5, city="Muster", street="city"
     )
@@ -22,6 +22,12 @@ def add():
     db.session.commit()
     print(data_point)
     return {"status": "OK", "data": [model_to_json(data_point)]}
+
+
+@app.route("add_logger_line", methods=["POST"])
+def add_logger_line():
+    line = request.form['data']
+    log_data_to_file(line)
 
 
 @app.route("/get_all")

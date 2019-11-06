@@ -1,13 +1,16 @@
-from flask import redirect, render_template, url_for, request
+import json
+
+from flask import redirect, render_template, request, url_for
+
 from server import app, db
+
 from .model import Airpolution
 from .tools import model_to_json
-import json
 
 
 @app.route("/")
 def index():
-    pass
+    return "Hello"
 
 
 @app.route("/add", methods=["POST"])
@@ -28,4 +31,14 @@ def get_all():
     data = {"status": "OK", "data": []}
     for point in a:
         data["data"].append(model_to_json(point))
-    return json.dumps(data)
+    return data
+
+
+@app.route("/get/<int:id>")
+def get(id: int):
+    a = Airpolution.query.filter_by(id=id)
+    print(a)
+    data = {"status": "OK", "data": []}
+    for point in a:
+        data["data"].append(model_to_json(point))
+    return data

@@ -1,7 +1,7 @@
 from .model import Airpolution
 
 
-def model_to_json(database_content: Airpolution):
+def model_to_json(database_content: Airpolution) -> dict:
     return {
         "id": database_content.id,
         "coordinates": [database_content.latitude, database_content.longitude],

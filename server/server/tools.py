@@ -1,5 +1,6 @@
 from .model import Airpolution
-
+from flask import url_for
+from datetime import datetime as dt
 
 def model_to_json(database_content: Airpolution) -> dict:
     return {
@@ -10,3 +11,7 @@ def model_to_json(database_content: Airpolution) -> dict:
         "street": database_content.street,
     }
 
+def log_data_to_file(line):
+    current_date = dt.now().date()
+    with open("server\\server\\data_foder\\%s.csv" % current_date, "at") as target:
+        target.write(line)

@@ -24,7 +24,7 @@ def add_to_database():
     return {"status": "OK", "data": [model_to_json(data_point)]}
 
 
-@app.route("add_logger_line", methods=["POST"])
+@app.route("/add_logger_line", methods=["POST"])
 def add_logger_line():
     line = request.form['data']
     log_data_to_file(line)

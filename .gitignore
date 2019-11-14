@@ -6,3 +6,4 @@ server/server/__pycache__/
 start_server_conda.bat
 
 server/server/airpolution.db
+tests.py

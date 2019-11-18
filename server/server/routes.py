@@ -13,15 +13,18 @@ def index():
     return "Hello"
 
 
-@app.route("/add_to_database", methods=["POST"])
+@app.route("/add_to_database", methods=["POST", "GET"])
 def add_to_database():
-    data_point = Airpolution(
-        longitude=7.87345867, latitude=51.834568, data=0.5, city="Muster", street="city"
-    )
-    db.session.add(data_point)
-    db.session.commit()
-    print(data_point)
-    return {"status": "OK", "data": [model_to_json(data_point)]}
+    if request.method == "POST":
+        data_point = Airpolution(
+            longitude=7.87345867, latitude=51.834568, data=0.5, city="Muster", street="city"
+        )
+        db.session.add(data_point)
+        db.session.commit()
+        print(data_point)
+        return {"status": "OK", "data": [model_to_json(data_point)]}
+    elif request.method == "GET":
+        return "pleas use POST request for the moment"
 
 
 @app.route("/add_logger_line", methods=["POST"])

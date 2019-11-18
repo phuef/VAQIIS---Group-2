@@ -30,6 +30,7 @@ def split_feature(feature: dict, split_point: tuple, index: int):
         delete_list.append(index)
 
     except ValueError:
+        # TO DO
         pass
 
 
@@ -68,16 +69,19 @@ with progressbar.ProgressBar(max_value=len(geosjon["features"]), widgets=widgets
 
 intersection_set = set()
 intersection_points = []
-# lines_on_points = []
 print(len(new_geojson["features"]))
 with progressbar.ProgressBar(max_value=len(new_geojson["features"]), widgets=widgets) as bar:
     for i, feature1 in enumerate(new_geojson["features"]):
-        start = tuple(feature1["geometry"]["coordinates"][0])
-        end = tuple(feature1["geometry"]["coordinates"][-1])
+        start1 = tuple(feature1["geometry"]["coordinates"][0])
+        end1 = tuple(feature1["geometry"]["coordinates"][-1])
         cur_geom = ogr.CreateGeometryFromJson(json.dumps(feature1["geometry"]))
 
         # lines_on_points.append([])
-        for j, feature2 in enumerate(new_geojson["features"]):
+        for j, feature2 in enumerate(new_geojson["features"][i+1:]):
+            j = j+i+1
+            start2 = tuple(feature2["geometry"]["coordinates"][0])
+            end2 = tuple(feature2["geometry"]["coordinates"][-1])
+
             geom = ogr.CreateGeometryFromJson(json.dumps(feature2["geometry"]))
             intersect = cur_geom.Intersection(geom)
             if intersect.GetGeometryName() == "POINT":
@@ -87,18 +91,20 @@ with progressbar.ProgressBar(max_value=len(new_geojson["features"]), widgets=wid
                     intersection_set.add(coord)
                     # lines_on_points[i].append(feature2)
 
-                if coord not in (start, end):
+                if coord not in (start1, end1):
                     split_feature(feature1, coord, i)
+                if coord not in (start2, end2):
+                    split_feature(feature2, coord, j)
 
         wkt = "POINT (%s %s)"
-        if start not in intersection_set:
-            intersection_set.add(start)
-            point = ogr.CreateGeometryFromWkt(wkt % start)
+        if start1 not in intersection_set:
+            intersection_set.add(start1)
+            point = ogr.CreateGeometryFromWkt(wkt % start1)
             intersection_points.append(point)
             # lines_on_points[i].append(point)
-        if end not in intersection_set:
-            intersection_set.add(end)
-            point = ogr.CreateGeometryFromWkt(wkt % end)
+        if end1 not in intersection_set:
+            intersection_set.add(end1)
+            point = ogr.CreateGeometryFromWkt(wkt % end1)
             intersection_points.append(point)
             # lines_on_points[i].append(point)
 

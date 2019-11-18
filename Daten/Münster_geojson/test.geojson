@@ -1,0 +1,464 @@
+{
+  "type": "FeatureCollection",
+  "generator": "overpass-ide",
+  "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.",
+  "timestamp": "2019-11-12T14:23:03Z",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/22813530",
+        "highway": "residential",
+        "maxspeed": "30",
+        "motorcar": "destination",
+        "motorcycle": "destination",
+        "name": "Paul-Wulf-Weg",
+        "old_name": "Jöttenweg",
+        "place_numbers": "1-13",
+        "surface": "asphalt",
+        "website": "https://www.wn.de/Muenster/Ampel-Koalition-duepiert-CDU-Umstrittene-Strassennamen-kriegen-neue-Namen"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6046649,
+            51.9604073
+          ],
+          [
+            7.6038648,
+            51.9610907
+          ],
+          [
+            7.603654,
+            51.9612804
+          ],
+          [
+            7.6034778,
+            51.9614742
+          ]
+        ]
+      },
+      "id": "way/22813530"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/22813533",
+        "cycleway:right": "track",
+        "description:name": "Johann Hermann Hüffer (1784-1855), münsterischer Oberbürgermeister, Sohn Wilhelm (1821-1895) Großkaufmann und Wohltäter der Stadt (Hüfferstiftung 1903)",
+        "highway": "tertiary",
+        "lit": "yes",
+        "maxspeed": "30",
+        "name": "Hüfferstraße",
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6057523,
+            51.9608395
+          ],
+          [
+            7.6053671,
+            51.9606872
+          ],
+          [
+            7.6046649,
+            51.9604073
+          ],
+          [
+            7.6042385,
+            51.960227
+          ]
+        ]
+      },
+      "id": "way/22813533"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/24733580",
+        "highway": "footway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.605567,
+            51.9590538
+          ],
+          [
+            7.6048367,
+            51.9597142
+          ],
+          [
+            7.6045471,
+            51.9599823
+          ],
+          [
+            7.6044597,
+            51.960063
+          ],
+          [
+            7.604865,
+            51.9602192
+          ],
+          [
+            7.6046649,
+            51.9604073
+          ]
+        ]
+      },
+      "id": "way/24733580"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/82325330",
+        "cycleway:right": "track",
+        "description:name": "Johann Hermann Hüffer (1784-1855), münsterischer Oberbürgermeister, Sohn Wilhelm (1821-1895) Großkaufmann und Wohltäter der Stadt (Hüfferstiftung 1903)",
+        "highway": "tertiary",
+        "lit": "yes",
+        "maxspeed": "50",
+        "name": "Hüfferstraße",
+        "oneway": "yes",
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6026535,
+            51.959589
+          ],
+          [
+            7.6027777,
+            51.9596346
+          ],
+          [
+            7.6033684,
+            51.9598507
+          ],
+          [
+            7.6039092,
+            51.9600565
+          ],
+          [
+            7.6042385,
+            51.960227
+          ]
+        ]
+      },
+      "id": "way/82325330"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/174970665",
+        "cycleway:right": "track",
+        "description:name": "Johann Hermann Hüffer (1784-1855), münsterischer Oberbürgermeister, Sohn Wilhelm (1821-1895) Großkaufmann und Wohltäter der Stadt (Hüfferstiftung 1903)",
+        "highway": "tertiary",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "50",
+        "name": "Hüfferstraße",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "turn:lanes": "left|right;through"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6036918,
+            51.9600529
+          ],
+          [
+            7.6032357,
+            51.9598969
+          ]
+        ]
+      },
+      "id": "way/174970665"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/175290023",
+        "cycleway:right": "track",
+        "description:name": "Johann Hermann Hüffer (1784-1855), münsterischer Oberbürgermeister, Sohn Wilhelm (1821-1895) Großkaufmann und Wohltäter der Stadt (Hüfferstiftung 1903)",
+        "highway": "tertiary",
+        "lit": "yes",
+        "maxspeed": "50",
+        "name": "Hüfferstraße",
+        "oneway": "yes",
+        "source:maxspeed": "sign",
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6042385,
+            51.960227
+          ],
+          [
+            7.6036918,
+            51.9600529
+          ]
+        ]
+      },
+      "id": "way/175290023"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/286859607",
+        "highway": "service"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6036623,
+            51.9595376
+          ],
+          [
+            7.6033684,
+            51.9598507
+          ]
+        ]
+      },
+      "id": "way/286859607"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/518856205",
+        "highway": "service",
+        "service": "driveway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6036918,
+            51.9600529
+          ],
+          [
+            7.6035631,
+            51.9601818
+          ]
+        ]
+      },
+      "id": "way/518856205"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/562085096",
+        "highway": "service",
+        "service": "driveway",
+        "tunnel": "building_passage"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6035631,
+            51.9601818
+          ],
+          [
+            7.6034678,
+            51.9602747
+          ]
+        ]
+      },
+      "id": "way/562085096"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/562085097",
+        "highway": "footway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6029512,
+            51.9607848
+          ],
+          [
+            7.6030109,
+            51.9607248
+          ],
+          [
+            7.6031912,
+            51.9605449
+          ],
+          [
+            7.6034678,
+            51.9602747
+          ]
+        ]
+      },
+      "id": "way/562085097"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/562085098",
+        "highway": "footway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6030109,
+            51.9607248
+          ],
+          [
+            7.6034016,
+            51.9608735
+          ]
+        ]
+      },
+      "id": "way/562085098"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/562085099",
+        "highway": "footway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6031912,
+            51.9605449
+          ],
+          [
+            7.6035831,
+            51.9606977
+          ]
+        ]
+      },
+      "id": "way/562085099"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/568963320",
+        "cycleway:right": "track",
+        "description:name": "Johann Hermann Hüffer (1784-1855), münsterischer Oberbürgermeister, Sohn Wilhelm (1821-1895) Großkaufmann und Wohltäter der Stadt (Hüfferstiftung 1903)",
+        "highway": "tertiary",
+        "lanes": "2",
+        "maxspeed": "50",
+        "name": "Hüfferstraße",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "turn:lanes": "right|right"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6032357,
+            51.9598969
+          ],
+          [
+            7.602992,
+            51.9598862
+          ],
+          [
+            7.602897,
+            51.9598865
+          ],
+          [
+            7.6028558,
+            51.9599001
+          ],
+          [
+            7.6027299,
+            51.9599418
+          ],
+          [
+            7.602626,
+            51.9600014
+          ]
+        ]
+      },
+      "id": "way/568963320"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/568963321",
+        "description:name": "Johann Hermann Hüffer (1784-1855), münsterischer Oberbürgermeister, Sohn Wilhelm (1821-1895) Großkaufmann und Wohltäter der Stadt (Hüfferstiftung 1903)",
+        "highway": "tertiary",
+        "lanes": "2",
+        "lit": "yes",
+        "maxspeed": "50",
+        "name": "Hüfferstraße",
+        "oneway": "yes",
+        "surface": "asphalt",
+        "turn:lanes": "left|through"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6032357,
+            51.9598969
+          ],
+          [
+            7.6028964,
+            51.9597754
+          ],
+          [
+            7.6027658,
+            51.9597297
+          ],
+          [
+            7.6026467,
+            51.9596873
+          ]
+        ]
+      },
+      "id": "way/568963321"
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "@id": "way/598038321",
+        "highway": "footway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            7.6034016,
+            51.9608735
+          ],
+          [
+            7.6035831,
+            51.9606977
+          ],
+          [
+            7.6039973,
+            51.9603416
+          ],
+          [
+            7.6042385,
+            51.960227
+          ]
+        ]
+      },
+      "id": "way/598038321"
+    }
+  ]
+}

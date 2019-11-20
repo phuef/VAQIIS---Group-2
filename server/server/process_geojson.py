@@ -117,6 +117,12 @@ for i in delete_list:
     new_geojson["features"].pop(i)
 new_geojson["features"].extend(insert_list)
 
+# calculate distances for each feature
+for i, feature in enumerate(new_geojson["features"]):
+    if feature["geometry"]["type"] == "LineString":
+        feature = ogr.CreateGeometryFromJson(feature["geomatry"])
+        new_geojson["features"][i]["properties"]["distance"] = feature.Length()
+
 with progressbar.ProgressBar(max_value=len(intersection_points), widgets=widgets) as bar:
     for i, point in enumerate(intersection_points):
         node =  json.loads(json.dumps(node_template))

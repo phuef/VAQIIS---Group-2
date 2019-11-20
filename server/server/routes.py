@@ -10,7 +10,7 @@ from .tools import model_to_json, log_data_to_file
 
 @app.route("/")
 def index():
-    return "Hello"
+    return render_template("index.html")
 
 
 @app.route("/add_to_database", methods=["POST", "GET"])

@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import sklearn.cluster as cluster
 import time
 import hdbscan
@@ -11,16 +9,7 @@ import json
 from osgeo import ogr, osr
 import math
 import os
-
-sns.set_context("poster")
-sns.set_color_codes()
-plot_kwds = {"alpha": 1, "s": 5, "linewidths": 0}
-
-with open(
-    "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\Daten\\cluster_dataset\\routes\\1\\1406176952000",
-    "rt",
-) as f:
-    data = np.loadtxt(f)
+import pickle
 
 
 def seperate_into_levels(data: np.array, level_index: int):
@@ -40,7 +29,8 @@ def seperate_into_levels(data: np.array, level_index: int):
 
 
 def create_regons_of_interest_from_level(
-    seperation: list, lat_long: tuple = (0, 1), buffer: float = 10) -> dict:
+    seperation: list, lat_long: tuple = (0, 1), buffer: float = 5
+) -> dict:
     lat, lng = lat_long
 
     def singel_region(cluster: np.ndarray) -> ogr.Geometry:
@@ -58,16 +48,18 @@ def create_regons_of_interest_from_level(
         return hull
 
     multipolygon = {"type": "MultiPolygon", "coordinates": []}
-    for cluster in seperation:
-        json_roi = json.loads(singel_region(cluster).ExportToJson())
-        multipolygon["coordinates"].append(json_roi["coordinates"])
-
+    for i, cluster in enumerate(seperation):
+        try:
+            json_roi = json.loads(singel_region(cluster).ExportToJson())
+            multipolygon["coordinates"].append(json_roi["coordinates"])
+        except KeyError:
+            print(f"Error at cluster {i}")
     return multipolygon
 
 
 def spatial_cluster(level) -> np.ndarray:
     lables = hdbscan.HDBSCAN(min_cluster_size=15).fit_predict(level)
-    num_lables = len(set(lables))
+    num_lables = np.unique(lables).max()
     seperation = []
     for i in range(num_lables):
         ids = np.where(lables == i)
@@ -76,7 +68,9 @@ def spatial_cluster(level) -> np.ndarray:
     return seperation
 
 
-def convert_sr(geom: ogr.Geometry, epsg_source: int = 4326, epsg_target: int = 3044) -> ogr.Geometry:
+def convert_sr(
+    geom: ogr.Geometry, epsg_source: int = 4326, epsg_target: int = 3044
+) -> ogr.Geometry:
     source = osr.SpatialReference()
     source.ImportFromEPSG(epsg_source)
 
@@ -90,13 +84,62 @@ def convert_sr(geom: ogr.Geometry, epsg_source: int = 4326, epsg_target: int = 3
     return geom
 
 
-def main():
-    levels = seperate_into_levels(data, 3)
-    cluster = spatial_cluster(levels[-1])
-    mp = create_regons_of_interest_from_level(cluster)
-    with open("multiF.json", "wt") as f:
-        json.dump(mp, f)
+def main(path):
+    with open(path, "rt") as f:
+        data = np.loadtxt(f)
 
+    t0 = time.perf_counter()
+
+    levels = seperate_into_levels(data, 3)
+
+    #########################################
+
+    t1 = time.perf_counter()
+    print(f"Time for leveling: {t1-t0}")
+
+    with ProcessPoolExecutor() as executer:
+        level_cluster = executer.map(spatial_cluster, levels)
+
+    t2 = time.perf_counter()
+    print(f"Time for clustering: {t2-t1}")
+
+    with ProcessPoolExecutor() as executer:
+        rois_per_level = executer.map(create_regons_of_interest_from_level, level_cluster)
+
+    t3 = time.perf_counter()
+    print(f"Time for rois: {t3-t2}")
+    print(f"Time for completion: {t3-t0}")
+
+    rois_per_level = list(rois_per_level)
+
+    #########################################
+
+    # t1 = time.perf_counter()
+    # print(f"Time for leveling: {t1-t0}")
+
+    # level_cluster = []
+    # for level in levels:
+    #     level_cluster.append(spatial_cluster(level))
+
+    # t2 = time.perf_counter()
+    # print(f"Time for clustering: {t2-t1}")
+
+    # rois_per_level = []
+    # for cluster in level_cluster:
+    #     rois_per_level.append(create_regons_of_interest_from_level(cluster))
+
+    # t3 = time.perf_counter()
+    # print(f"Time for rois: {t3-t2}")
+    # print(f"Time for completion: {t3-t1}")
+
+    #########################################
+
+    pickle.dump(rois_per_level, open("server\\server\\data_foder\\rois.p", "wb"))
+    
 
 if __name__ == "__main__":
-    main()
+    freeze_support()
+    main(
+        "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\Daten\\cluster_dataset\\routes\\1\\1406176952000"
+    )
+

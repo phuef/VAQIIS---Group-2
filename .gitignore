@@ -9,3 +9,5 @@ server/server/airpolution.db
 tests.py
 
 new_geojson.json
+
+*.pyc

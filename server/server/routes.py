@@ -6,6 +6,8 @@ from server import app, db
 
 from .model import Airpolution
 from .tools import model_to_json, log_data_to_file
+import pickle
+import os
 
 
 @app.route("/")
@@ -51,3 +53,11 @@ def get(id: int):
     for point in a:
         data["data"].append(model_to_json(point))
     return data
+
+
+@app.route("/get_rois/<int:level>", methods=["GET"])
+def get_rois(level:int):
+    print(os.getcwd())
+    levels = pickle.load(open(os.path.join("server", "data_folder", "rois.p"), "rb"))
+    print(levels)
+    return levels[level]

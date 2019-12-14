@@ -134,12 +134,13 @@ def main(path):
 
     #########################################
 
-    pickle.dump(rois_per_level, open("server\\server\\data_foder\\rois.p", "wb"))
+    pickle.dump(rois_per_level, open(os.path.join("data_foder", "rois.p"), "wb"))
     
 
 if __name__ == "__main__":
+    os.chdir(os.path.join("server", "server"))
     freeze_support()
     main(
         "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\Daten\\cluster_dataset\\routes\\1\\1406176952000"
     )
-
+    

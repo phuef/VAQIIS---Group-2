@@ -55,9 +55,12 @@ def get(id: int):
     return data
 
 
-@app.route("/get_rois/<int:level>", methods=["GET"])
-def get_rois(level:int):
-    print(os.getcwd())
+@app.route("/getroi_level/<int:level>", methods=["GET"])
+def getroi_level(level:int):
     levels = pickle.load(open(os.path.join("server", "data_folder", "rois.p"), "rb"))
-    print(levels)
-    return levels[level]
+    return {"status": "OK", "data": levels[level]}
+
+@app.route("/getrois", methods=["GET"])
+def getrois():
+    levels = pickle.load(open(os.path.join("server", "data_folder", "rois.p"), "rb"))
+    return {"status": "OK", "data": levels}

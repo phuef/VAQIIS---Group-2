@@ -14,6 +14,14 @@ var osmlayer =  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 }).addTo(map);
 
 var rois = [];
+var layerGroup = new L.LayerGroup();
+layerGroup.addTo(map);
+
+function addToMap(roiLevel) {
+    layerGroup.clearLayers();
+    let roi = L.geoJson(roiLevel);
+    layerGroup.addLayer(roi);
+}
 
 $(document).ready(function () {
     let level = $("#slider").val();
@@ -23,12 +31,17 @@ $(document).ready(function () {
         url: "/getrois",
         success: function (response) {
             rois = response.data;
-            console.log(rois);
-            L.geoJson(rois[level]).addTo(map);
+            addToMap(rois[level])
         }
     });
 });
 
 $(document).on('input', '#slider', function() {
     $("#sliderValue").text(this.value);
+    let level = $(this).val();
+    addToMap(rois[level]);
 });
+
+// $("#slider").change(function () { 
+    
+// });

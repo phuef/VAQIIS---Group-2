@@ -19,8 +19,26 @@
 
 <body>
     <div id="map"></div>
-    <input type="range" min="0" max="10" value="5" class="slider" id="slider">
-    <span id="sliderValue"></span>
+    <!-- <button id="openNav" class="navButton">&#9776;</button> -->
+    <div class="mapControll">
+        <!-- <button id="closeNav" class="navButton">&times;</button> -->
+        <table>
+            <tr>
+                <td><label for="slider">Select level</label></td>
+                <td><input type="range" min="0" max="10" value="5" class="slider" id="slider"></td>
+                <td><span id="sliderValue"></span></td>
+            </tr>
+            <tr>
+                <td><label for="start">Start</label></td>
+                <td><input type="text" class="input" id="start" name="Start"></td>
+            </tr>
+            <tr>
+                <td><label for="finish">Finish</label></td>
+                <td><input type="text" class="input" id="finish" name="Finish"></td>
+            </tr>
+        </table>
+    </div>
+
 
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>

@@ -1,7 +1,7 @@
 var mapOptions = {
-    center: [51.9607, 7.6261],
-    zoom: 13,
-    zoomControl: true,
+    center: [64.00, 26.00],
+    zoom: 7,
+    zoomControl: false,
     dragging: true,
     attributionControl: true
 };
@@ -41,7 +41,3 @@ $(document).on('input', '#slider', function() {
     let level = $(this).val();
     addToMap(rois[level]);
 });
-
-// $("#slider").change(function () { 
-    
-// });

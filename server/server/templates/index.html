@@ -20,23 +20,41 @@
 <body>
     <div id="map"></div>
     <!-- <button id="openNav" class="navButton">&#9776;</button> -->
-    <div class="mapControll">
+    <div class="sidebar">
         <!-- <button id="closeNav" class="navButton">&times;</button> -->
         <table>
             <tr>
-                <td><label for="slider">Select level</label></td>
+                <td><span>Transport:</span></td>
+                <td>
+                    <input type="radio" class="transport" name="transport" value="driving-car"> Car
+                    <input type="radio" class="transport" name="transport" value="cycling-regular" checked> Bicycle
+                    <input type="radio" class="transport" name="transport" value="foot-walking"> Pedestrian
+                    <!-- <input type="radio" class="transport" name="transport" value="wheelchair"> Wheelchair -->
+                </td>
+            </tr>
+            <tr>
+                <td><label for="start">Start:</label></td>
+                <td><input type="text" class="input" id="start" name="Start"></td>
+            </tr>
+            <tr>
+                <td><label for="finish">Finish:</label></td>
+                <td><input type="text" class="input" id="finish" name="Finish"></td>
+            </tr>
+            <tr>
+                <td><label for="slider">Select level:</label></td>
                 <td><input type="range" min="0" max="10" value="5" class="slider" id="slider"></td>
                 <td><span id="sliderValue"></span></td>
             </tr>
             <tr>
-                <td><label for="start">Start</label></td>
-                <td><input type="text" class="input" id="start" name="Start"></td>
-            </tr>
-            <tr>
-                <td><label for="finish">Finish</label></td>
-                <td><input type="text" class="input" id="finish" name="Finish"></td>
+                <td><button id="submit" class="button">Submit</button></td>
+                <td></td>
             </tr>
         </table>
+        <div id="navigationInfo" class="navInfo">
+            <h3>Instructions:</h3>
+            <ul style="list-style-type: none;" id="navList"></ul>
+        </div>
+
     </div>
 
 

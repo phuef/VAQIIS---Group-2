@@ -1,11 +1,13 @@
 import json
 
 from flask import redirect, render_template, request, url_for
-
+import numpy as np
+import pandas as pd
 from server import app, db
 
 from .model import Airpolution
 from .tools import model_to_json, log_data_to_file
+from .extract import getValues
 import pickle
 import os
 
@@ -64,3 +66,20 @@ def getroi_level(level:int):
 def getrois():
     levels = pickle.load(open(os.path.join("server", "data_folder", "rois.p"), "rb"))
     return {"status": "OK", "data": levels}
+
+@app.route("/upload", methods=["GET"])
+def upload():
+    return render_template("upload.html")
+
+@app.route("/api/upload", methods=["POST"])
+def api_upload():
+    new_file = request.files["fileUpload"]
+    # print(new_file)
+    # print(type(new_file))
+    # print(str(new_file.read()))
+    print(pd.read_csv(new_file, skiprows=1).head())
+    # new_data = getValues(new_file.read())
+
+    # print(new_data)
+    
+    

@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+import os
 
 def getValues(filePath):
     with open(filePath) as csv_file:
@@ -16,6 +17,7 @@ def getValues(filePath):
         pm5=[]
         pm=10[]
         '''
+        pm10 = []
         lat= searchForParameters(elements, ["rmclatitude"])
         lon= searchForParameters(elements, ["rmclongitude"])
         time= searchForParameters(elements, ["TIMESTAMP"])
@@ -57,12 +59,15 @@ def getValues(filePath):
                                     else:
                                         PM10 = float(bin1[counter])+float(bin2[counter])+float(bin3[counter])+float(bin4[counter])+float(bin5[counter])+float(bin6[counter])+float(bin7[counter])+float(bin8[counter])+float(bin9[counter])+float(bin10[counter])+float(bin11[counter])+float(bin12[counter])+float(bin13[counter])+float(bin14[counter])+float(bin15[counter])+float(bin16[counter])
                                         Output=[lon[counter],lat[counter],time[counter],PM10]
-                                        C = np.array(Output)
-                                        print(C)
+                                        pm10.append(Output)
+                                        # print(C)
                                         counter=counter+1
                             else:
                                 print("Not all Bins have Values")
                                 counter=counter+1
+
+        print(pm10)
+        return np.array(pm10)
 
 def searchForParameters(elements, paramArray):
     '''
@@ -91,4 +96,6 @@ def getAllRowElements(rowname,elements):
                     values.append(x[indexOf])
             return values
 
-getValues("sample_data.dat")
+if __name__ == "__main__":
+    os.chdir("data_extraction\\")
+    getValues("sample_data.dat")

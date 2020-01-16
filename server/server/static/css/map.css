@@ -95,3 +95,15 @@ table {
 	padding: .5em 1ex;
 	border-bottom: 1px solid black;
 }
+
+#info {
+	position: absolute;
+	bottom: 20px;
+	left: 50%;
+	z-index: 2;
+	background-color: rgba(251, 255, 0, 0.5);
+	transform: translateX(-50%);
+	border-radius: 10px;
+	padding: 10px;
+	display: none;
+}

@@ -1,6 +1,6 @@
 var mapOptions = {
-	center: [64.00, 26.00],
-	zoom: 7,
+	center: [51.96,7.60],
+	zoom: 13,
 	zoomControl: false,
 	dragging: true,
 	attributionControl: true
@@ -169,6 +169,9 @@ $(document).ready(function () {
 				error: function (err) {
 					console.log(err);
 					// addRouteFeatures(response.responseText);
+					$("#info").show();
+					$("#info").text(err.responseText);
+					$("#info").delay("10000").fadeOut();
 				}
 			});
 		} else {

@@ -3,6 +3,7 @@
 import pandas as pd
 import pandasql as ps
 import os
+import csv
 
 def dataExtractionCSV(filename):
     data= pd.read_csv(filename)
@@ -25,13 +26,14 @@ def dataExtractionDAT(filename):
     for i in range(1,17):
         str+= f"LiveBin_{i}dM"
         if i<16:
-            str+="+ "
+            str+=", "
     sql=f"""SELECT TIMESTAMP, 
     substr(rmclatitude, 1, 2) || '.' || cast(cast(substr(rmclatitude, 3, 2) || substr(rmclatitude, 6)as integer)/60 as text) as lat, 
     substr(rmclongitude, 2, 2) || '.' || cast(cast(substr(rmclongitude, 4, 2) || substr(rmclongitude, 7)as integer)/60 as text) as lon, 
-    {str} AS pm10 FROM data"""
+    {str}  FROM data"""
     a=ps.sqldf(sql, locals())
     a.to_csv(f'extracted_Data_{filename}')
+    deleteUnneccessaryRows(f'extracted_Data_{filename}')
 
 def datToCSV(filename):
     with open(f'{filename}.dat', 'r') as reader:
@@ -55,6 +57,21 @@ def datExtraction(filename):
     datToCSV(filename)
     os.remove(f'{filename}.txt')
     os.remove(f'{filename}.csv')
+
+def deleteUnneccessaryRows(filename):
+    lines=list()
+    with open(filename, 'r') as readFile:
+        reader = csv.reader(readFile)
+        for row in reader:
+            lines.append(row)
+            for field in row:
+                if field=="TS" or field=="0.0":
+                    lines.remove(row)
+                    break
+    with open(filename, 'w', newline='') as writeFile:
+        writer = csv.writer(writeFile)
+        writer.writerows(lines)
+
 
 # dataExtractionCSV('2019-12-19_fasttable.csv')
 # datExtraction('TOA5_fasttable2_2019_10_29_0939')

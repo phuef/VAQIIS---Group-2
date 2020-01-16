@@ -1,17 +1,19 @@
-import numpy as np
-import sklearn.cluster as cluster
-import time
-import hdbscan
-from pprint import pprint
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-from multiprocessing import freeze_support
 import json
-from osgeo import ogr, osr
 import math
 import os
 import pickle
+import time
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
+from multiprocessing import freeze_support
+from pprint import pprint
+
+import hdbscan
+import numpy as np
 import pandas as pd
+import sklearn.cluster as cluster
+from osgeo import ogr, osr
+
 
 def devide_by_time(data: np.ndarray, timestamp_index:int, time_range_hours:int):
     print(datetime.fromtimestamp(data[timestamp_index]))
@@ -141,13 +143,10 @@ def convert_sr(
 # assert convex_hull([(i//10, i%10) for i in range(100)]) == [(0, 0), (9, 0), (9, 9), (0, 9)]
 
 
-def main(path):
-    with open(path, "rt") as f:
-        data = extract_data(f)
-
+def main(fileBuffer):
+    data = extract_data(fileBuffer)
 
     t0 = time.perf_counter()
-
 
     levels = seperate_into_levels(data, 3)
 
@@ -193,15 +192,14 @@ def main(path):
     print(f"Time for completion: {t3-t1}")
 
     #########################################
-    with open("test.json", "wt") as f:
-        f.write(str(rois_per_level[0]))
-    pickle.dump(rois_per_level, open(os.path.join("data_folder", "rois.p"), "wb"))
+    # with open("test.json", "wt") as f:
+    #     f.write(str(rois_per_level[0]))
+    pickle.dump(rois_per_level, open(os.path.join("server", "data_folder", "rois.p"), "wb"))
     
 
 if __name__ == "__main__":
     os.chdir(os.path.join("server", "server"))
     freeze_support()
-    main(
-        "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\Daten\\cluster_dataset\\2019-12-19_fasttable.csv"
-    )
-    
+    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\Daten\\cluster_dataset\\2019-12-19_fasttable.csv"
+    with open(path, "rt") as f:
+        main(f)

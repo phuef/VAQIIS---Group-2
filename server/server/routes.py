@@ -2,17 +2,18 @@ import json
 
 from flask import redirect, render_template, request, url_for
 import numpy as np
-import pandas as pd
 from server import app, db
 
 from .model import Airpolution
 from .tools import model_to_json, log_data_to_file
 from .extract import getValues
+from .cluster_data import main
 import pickle
 import os
 
 
 @app.route("/")
+@app.route("/map")
 def index():
     return render_template("index.html")
 
@@ -74,12 +75,7 @@ def upload():
 @app.route("/api/upload", methods=["POST"])
 def api_upload():
     new_file = request.files["fileUpload"]
-    # print(new_file)
-    # print(type(new_file))
-    # print(str(new_file.read()))
-    print(pd.read_csv(new_file, skiprows=1).head())
-    # new_data = getValues(new_file.read())
+    main(new_file)
+    return redirect("/")
 
-    # print(new_data)
-    
     

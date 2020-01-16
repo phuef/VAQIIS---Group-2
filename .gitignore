@@ -12,3 +12,5 @@ new_geojson.json
 
 *.pyc
 server/server/test.json
+
+server/test.json

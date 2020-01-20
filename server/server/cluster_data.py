@@ -14,17 +14,33 @@ import pandas as pd
 import sklearn.cluster as cluster
 from osgeo import ogr, osr
 
+def devide_by_time(data: pd.DataFrame):
+    oldestDate = datetime(data["TIMESTAMP"].min())
+    newestDate = datetime(data["TIMESTAMP"].max())
 
-def devide_by_time(data: np.ndarray, timestamp_index:int, time_range_hours:int):
-    print(datetime.fromtimestamp(data[timestamp_index]))
+    
 
-def extract_data(data) -> np.ndarray:
+
+    
+
+def extract_data(data) -> pd.DataFrame:
+    data_path = os.path.join("data_folder", "dataframe.p")
     t1 = pd.read_csv(data)
     bins = [f"LiveBin_{x}dM" for x in range(1,17)]
-    tpm10 = t1[[x for x in bins]].sum(axis=1)
-    tOut = pd.DataFrame({"TIMESTAMP": t1["TIMESTAMP"], "lat": t1["lat"], "lon": t1["lon"], "pm10": tpm10})
-    return tOut.to_numpy()
-
+    tpm10 = t1[[x for x in bins]].dropna().sum(axis=1)
+    # print(tpm10)
+    tOut = pd.DataFrame({"TIMESTAMP": t1["TIMESTAMP"], "lat": t1["lat"], "lon": t1["lon"], "pm10": tpm10}).dropna()
+    
+    try:
+        tOld = pd.read_pickle(data_path)
+        tNew = tOut.append(tOld, ignore_index = True).drop_duplicates().sort_values("TIMESTAMP")
+        tNew.to_pickle(data_path)
+        print(tNew)
+    except:
+        tOut.to_pickle(data_path)
+        print(tOut)
+    
+    return tNew
 
 def seperate_into_levels(data: np.ndarray, level_index: int):
     min_val = data.T[level_index].min()
@@ -98,53 +114,11 @@ def convert_sr(
 
     return geom
 
-# def convex_hull(points):
-#     """Computes the convex hull of a set of 2D points.
-
-#     Input: an iterable sequence of (x, y) pairs representing the points.
-#     Output: a list of vertices of the convex hull in counter-clockwise order,
-#       starting from the vertex with the lexicographically smallest coordinates.
-#     Implements Andrew's monotone chain algorithm. O(n log n) complexity.
-#     """
-
-#     # Sort the points lexicographically (tuples are compared lexicographically).
-#     # Remove duplicates to detect the case we have just one unique point.
-#     points = sorted(set(points))
-
-#     # Boring case: no points or a single point, possibly repeated multiple times.
-#     if len(points) <= 1:
-#         return points
-
-#     # 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
-#     # Returns a positive value, if OAB makes a counter-clockwise turn,
-#     # negative for clockwise turn, and zero if the points are collinear.
-#     def cross(o, a, b):
-#         return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
-
-#     # Build lower hull 
-#     lower = []
-#     for p in points:
-#         while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
-#             lower.pop()
-#         lower.append(p)
-
-#     # Build upper hull
-#     upper = []
-#     for p in reversed(points):
-#         while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
-#             upper.pop()
-#         upper.append(p)
-
-#     # Concatenation of the lower and upper hulls gives the convex hull.
-#     # Last point of each list is omitted because it is repeated at the beginning of the other list. 
-#     return lower[:-1] + upper[:-1]
-
-# # Example: convex hull of a 10-by-10 grid.
-# assert convex_hull([(i//10, i%10) for i in range(100)]) == [(0, 0), (9, 0), (9, 9), (0, 9)]
-
 
 def main(fileBuffer):
     data = extract_data(fileBuffer)
+
+    time_seperation = devide_by_time(data)
 
     t0 = time.perf_counter()
 
@@ -200,6 +174,6 @@ def main(fileBuffer):
 if __name__ == "__main__":
     os.chdir(os.path.join("server", "server"))
     freeze_support()
-    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\Daten\\cluster_dataset\\2019-12-19_fasttable.csv"
+    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\VAQIIS---Group-2\\data_extraction\\2019-12-19_fasttable.csv"
     with open(path, "rt") as f:
         main(f)

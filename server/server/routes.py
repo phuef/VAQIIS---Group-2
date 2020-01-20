@@ -6,7 +6,6 @@ from server import app, db
 
 from .model import Airpolution
 from .tools import model_to_json, log_data_to_file
-from .extract import getValues
 from .cluster_data import main
 import pickle
 import os

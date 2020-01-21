@@ -14,37 +14,56 @@ import pandas as pd
 import sklearn.cluster as cluster
 from osgeo import ogr, osr
 
-def devide_by_time(data: pd.DataFrame):
-    oldestDate = datetime(data["TIMESTAMP"].min())
-    newestDate = datetime(data["TIMESTAMP"].max())
-
-    
-
-
-    
 
 def extract_data(data) -> pd.DataFrame:
     data_path = os.path.join("data_folder", "dataframe.p")
     t1 = pd.read_csv(data)
-    bins = [f"LiveBin_{x}dM" for x in range(1,17)]
+    bins = [f"LiveBin_{x}dM" for x in range(1, 17)]
     tpm10 = t1[[x for x in bins]].dropna().sum(axis=1)
     # print(tpm10)
-    tOut = pd.DataFrame({"TIMESTAMP": t1["TIMESTAMP"], "lat": t1["lat"], "lon": t1["lon"], "pm10": tpm10}).dropna()
-    
+    tOut = pd.DataFrame(
+        {
+            "TIMESTAMP": t1["TIMESTAMP"],
+            "lat": t1["lat"],
+            "lon": t1["lon"],
+            "pm10": tpm10,
+        }
+    ).dropna()
+
     try:
         tOld = pd.read_pickle(data_path)
-        tNew = tOut.append(tOld, ignore_index = True).drop_duplicates().sort_values("TIMESTAMP")
+        tNew = (
+            tOut.append(tOld, ignore_index=True)
+            .drop_duplicates()
+            .sort_values("TIMESTAMP")
+        )
         tNew.to_pickle(data_path)
-        print(tNew)
+        # print(tNew)
     except:
-        tOut.to_pickle(data_path)
-        print(tOut)
-    
+        tOut.sort_values("TIMESTAMP").to_pickle(data_path)
+        # print(tOut)
+        tNew = tOut
+
     return tNew
 
-def seperate_into_levels(data: np.ndarray, level_index: int):
-    min_val = data.T[level_index].min()
-    max_val = data.T[level_index].max()
+
+def devide_by_time(data: pd.DataFrame):
+    data["TIMESTAMP"] = pd.to_datetime(data["TIMESTAMP"])
+    allDays = data["TIMESTAMP"].dt.normalize().unique()
+    numDays = len(allDays)
+    seperation = []
+    for day in allDays:
+        rows_to_day = data[data.TIMESTAMP >= day]
+        seperation.append(rows_to_day)
+
+    return seperation
+
+
+def seperate_into_levels(data: pd.DataFrame) -> list:
+    # min_val = data.T[level_index].min()
+    min_val = data["pm10"].min()
+    # max_val = data.T[level_index].max()
+    max_val = data["pm10"].max()
     div = (max_val - min_val) / 10
     steps = []
     levels = []
@@ -53,20 +72,21 @@ def seperate_into_levels(data: np.ndarray, level_index: int):
         steps.append(i * div)
 
     for i, step in enumerate(steps):
-        levels.append(data[np.where(data.T[level_index] >= step + min_val)])
+        # levels.append(data[np.where(data.T[level_index] >= step + min_val)])
+        level = data[data.pm10 >= step + min_val].reset_index(drop=True)
+        levels.append(level)
 
     return levels
 
 
 def create_regons_of_interest_from_level(
-    seperation: list, lat_long: tuple = (1, 2), buffer: float = 5
+    seperation: list, buffer: float = 5
 ) -> dict:
-    lat, lng = lat_long
 
-    def singel_region(cluster: np.ndarray) -> ogr.Geometry:
+    def singel_region(cluster: pd.DataFrame) -> ogr.Geometry:
         multipoint = ogr.Geometry(ogr.wkbMultiPoint)
-        for row in cluster:
-            point = ogr.CreateGeometryFromWkt(f"POINT ({row[lng]} {row[lat]})")
+        for _, row in cluster.iterrows():
+            point = ogr.CreateGeometryFromWkt(f"POINT ({row['lon']} {row['lat']})")
             multipoint.AddGeometry(point)
 
         multipoint = convert_sr(multipoint)
@@ -87,14 +107,16 @@ def create_regons_of_interest_from_level(
     return multipolygon
 
 
-def spatial_cluster(level, lat=1, lon=2) -> np.ndarray:
-    coordinates = level.T[[lat, lon]]
-    lables = hdbscan.HDBSCAN(min_cluster_size=5).fit_predict(coordinates.T)
+def spatial_cluster(level: pd.DataFrame) -> list:
+    # coordinates = level.T[[lat, lon]]
+    # print(level)
+    coordinates = level[["lat", "lon"]].to_numpy()
+    lables = hdbscan.HDBSCAN(min_cluster_size=2).fit_predict(coordinates)
     num_lables = np.unique(lables).max()
     seperation = []
     for i in range(num_lables):
         ids = np.where(lables == i)
-        seperation.append(level[ids])
+        seperation.append(level.loc[ids])
 
     return seperation
 
@@ -118,11 +140,15 @@ def convert_sr(
 def main(fileBuffer):
     data = extract_data(fileBuffer)
 
-    time_seperation = devide_by_time(data)
-
     t0 = time.perf_counter()
 
-    levels = seperate_into_levels(data, 3)
+    time_seperation = devide_by_time(data)
+
+    levels = []
+    for daySep in time_seperation:
+        levels.append(seperate_into_levels(daySep))
+
+    # print(levels)
 
     #########################################
 
@@ -150,30 +176,41 @@ def main(fileBuffer):
     t1 = time.perf_counter()
     print(f"Time for leveling: {t1-t0}")
 
-    level_cluster = []
-    for level in levels:
-        level_cluster.append(spatial_cluster(level))
+    day_cluster = []
+    for day in levels:
+        level_cluster = []
+        for level in day:
+            level_cluster.append(spatial_cluster(level))
+        day_cluster.append(level_cluster)
 
     t2 = time.perf_counter()
     print(f"Time for clustering: {t2-t1}")
 
-    rois_per_level = []
-    for cluster in level_cluster:
-        rois_per_level.append(create_regons_of_interest_from_level(cluster))
+    rois_per_day = []
+    for day in day_cluster:
+        rois_per_level = []
+        for cluster in day:
+            rois_per_level.append(create_regons_of_interest_from_level(cluster))
+        rois_per_day.append(rois_per_level)
 
     t3 = time.perf_counter()
     print(f"Time for rois: {t3-t2}")
     print(f"Time for completion: {t3-t1}")
 
     #########################################
-    # with open("test.json", "wt") as f:
-    #     f.write(str(rois_per_level[0]))
-    pickle.dump(rois_per_level, open(os.path.join("server", "data_folder", "rois.p"), "wb"))
-    
+    with open("test.json", "wt") as f:
+        f.write(str(rois_per_day))
+
+    # pprint(rois_per_day)
+    # pickle.dump(
+    #     rois_per_day, open(os.path.join("server","data_folder", "rois.p"), "wb")
+    # )
+
+
 
 if __name__ == "__main__":
     os.chdir(os.path.join("server", "server"))
     freeze_support()
-    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\VAQIIS---Group-2\\data_extraction\\2019-12-19_fasttable.csv"
+    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\VAQIIS---Group-2\\data_extraction\\extracted_Data_TOA5_fasttable1_2019_10_29_1029.csv"
     with open(path, "rt") as f:
         main(f)

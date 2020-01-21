@@ -3,10 +3,7 @@ import math
 import os
 import pickle
 import time
-from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
-from multiprocessing import freeze_support
-from pprint import pprint
 
 import hdbscan
 import numpy as np
@@ -14,13 +11,17 @@ import pandas as pd
 import sklearn.cluster as cluster
 from osgeo import ogr, osr
 
+# from concurrent.futures import ProcessPoolExecutor
+# from multiprocessing import freeze_support
+# from pprint import pprint
+
+
 
 def extract_data(data) -> pd.DataFrame:
     data_path = os.path.join("data_folder", "dataframe.p")
     t1 = pd.read_csv(data)
     bins = [f"LiveBin_{x}dM" for x in range(1, 17)]
     tpm10 = t1[[x for x in bins]].dropna().sum(axis=1)
-    # print(tpm10)
     tOut = pd.DataFrame(
         {
             "TIMESTAMP": t1["TIMESTAMP"],
@@ -38,31 +39,27 @@ def extract_data(data) -> pd.DataFrame:
             .sort_values("TIMESTAMP")
         )
         tNew.to_pickle(data_path)
-        # print(tNew)
     except:
         tOut.sort_values("TIMESTAMP").to_pickle(data_path)
-        # print(tOut)
         tNew = tOut
 
     return tNew
 
 
-def devide_by_time(data: pd.DataFrame):
+def devide_by_time(data: pd.DataFrame) -> dict:
     data["TIMESTAMP"] = pd.to_datetime(data["TIMESTAMP"])
     allDays = data["TIMESTAMP"].dt.normalize().unique()
     numDays = len(allDays)
-    seperation = []
+    seperation = {}
     for day in allDays:
         rows_to_day = data[data.TIMESTAMP >= day]
-        seperation.append(rows_to_day)
+        seperation[day] = rows_to_day
 
     return seperation
 
 
 def seperate_into_levels(data: pd.DataFrame) -> list:
-    # min_val = data.T[level_index].min()
     min_val = data["pm10"].min()
-    # max_val = data.T[level_index].max()
     max_val = data["pm10"].max()
     div = (max_val - min_val) / 10
     steps = []
@@ -72,7 +69,6 @@ def seperate_into_levels(data: pd.DataFrame) -> list:
         steps.append(i * div)
 
     for i, step in enumerate(steps):
-        # levels.append(data[np.where(data.T[level_index] >= step + min_val)])
         level = data[data.pm10 >= step + min_val].reset_index(drop=True)
         levels.append(level)
 
@@ -108,8 +104,6 @@ def create_regons_of_interest_from_level(
 
 
 def spatial_cluster(level: pd.DataFrame) -> list:
-    # coordinates = level.T[[lat, lon]]
-    # print(level)
     coordinates = level[["lat", "lon"]].to_numpy()
     lables = hdbscan.HDBSCAN(min_cluster_size=2).fit_predict(coordinates)
     num_lables = np.unique(lables).max()
@@ -144,9 +138,10 @@ def main(fileBuffer):
 
     time_seperation = devide_by_time(data)
 
-    levels = []
-    for daySep in time_seperation:
-        levels.append(seperate_into_levels(daySep))
+    levels_per_day = {}
+    for day in time_seperation.keys():
+        date = str(datetime.utcfromtimestamp(day.astype('O')/1e9).date())
+        levels_per_day[date] = seperate_into_levels(time_seperation.get(day))
 
     # print(levels)
 
@@ -176,22 +171,22 @@ def main(fileBuffer):
     t1 = time.perf_counter()
     print(f"Time for leveling: {t1-t0}")
 
-    day_cluster = []
-    for day in levels:
+    day_cluster = {}
+    for day in levels_per_day.keys():
         level_cluster = []
-        for level in day:
+        for level in levels_per_day.get(day):
             level_cluster.append(spatial_cluster(level))
-        day_cluster.append(level_cluster)
+        day_cluster[day] = level_cluster
 
     t2 = time.perf_counter()
     print(f"Time for clustering: {t2-t1}")
 
-    rois_per_day = []
-    for day in day_cluster:
+    rois_per_day = {}
+    for day in day_cluster.keys():
         rois_per_level = []
-        for cluster in day:
+        for cluster in day_cluster.get(day):
             rois_per_level.append(create_regons_of_interest_from_level(cluster))
-        rois_per_day.append(rois_per_level)
+        rois_per_day[day] = rois_per_level
 
     t3 = time.perf_counter()
     print(f"Time for rois: {t3-t2}")

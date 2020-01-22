@@ -108,3 +108,8 @@ table {
 	padding: 10px;
 	display: none;
 }
+
+#ajaxLoad {
+	background-color: rgba(0, 0, 0, 0.5);
+	display: none;
+}

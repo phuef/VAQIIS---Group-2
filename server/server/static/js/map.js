@@ -1,5 +1,5 @@
 var mapOptions = {
-	center: [51.96,7.60],
+	center: [51.96, 7.60],
 	zoom: 13,
 	zoomControl: false,
 	dragging: true,
@@ -40,12 +40,12 @@ $(document).ready(function () {
 		success: function (response) {
 			rois = response.data;
 			console.log(rois);
-			
+
 			dates = Object.keys(rois);
 			console.log(dates);
-			
+
 			$("#timeslider").attr({
-				max: dates.length-1
+				max: dates.length - 1
 			});
 			$("#timesliderValue").text(dates[0]);
 			addToMap(rois[dates[0]][level], LayerGroupRois, "#c82b00");
@@ -53,18 +53,26 @@ $(document).ready(function () {
 	});
 });
 
+$(document).ajaxStart(function () {
+	$("#ajaxLoad").show();
+});
+
+$(document).ajaxStop(function () {
+	$("#ajaxLoad").hide();
+});
+
 $(document).on('input', '#levelslider', function () {
 	$("#levelsliderValue").text(this.value);
 	let level = $(this).val();
 	let time = $("#timeslider").val();
-	
+
 	addToMap(rois[dates[time]][level], LayerGroupRois, "#c82b00");
 });
 $(document).on('input', '#timeslider', function () {
 	$("#timesliderValue").text(dates[this.value]);
 	let time = $(this).val();
 	let level = $("#levelslider").val();
-	
+
 	addToMap(rois[dates[time]][level], LayerGroupRois, "#c82b00");
 });
 
@@ -166,12 +174,13 @@ $(document).ready(function () {
 				finish = toCoordinates(finish);
 			}
 			let level = $("#levelslider").val();
+			let time = $("#timeslider").val();
 			let data = {
 				"coordinates": [
 					start, finish
 				],
 				"options": {
-					"avoid_polygons": rois[level]
+					"avoid_polygons": rois[dates[time]][level]
 				}
 			}
 			console.log(data);
@@ -213,10 +222,12 @@ function addRouteFeatures(geojson) {
 			return [coord[1], coord[0]];
 		};
 		segments[0].steps.forEach(element => {
-			let listObj = "<li class='listObj'>" + element.instruction + ": → "+ element.distance +"m</li>";
+			let listObj = "<li class='listObj'>" + element.instruction + ": → " + element.distance + "m</li>";
 			list += listObj;
-			
-			let marker = L.marker(swapCoord(geojson.geometry.coordinates[element.way_points[0]]), {"riseOnHover": true});
+
+			let marker = L.marker(swapCoord(geojson.geometry.coordinates[element.way_points[0]]), {
+				"riseOnHover": true
+			});
 			let popupText = "<table><tr><td>Instruction:</td><td>" + element.instruction + "</td></tr><tr><td>Distance to next point:<td>" + element.distance + "m</td></tr></table>";
 			marker.bindPopup(popupText);
 			markerLayer.addLayer(marker);

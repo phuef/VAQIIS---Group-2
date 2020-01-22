@@ -11,14 +11,14 @@ import pandas as pd
 import sklearn.cluster as cluster
 from osgeo import ogr, osr
 
-# from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 # from multiprocessing import freeze_support
 # from pprint import pprint
 
 
 
 def extract_data(data) -> pd.DataFrame:
-    data_path = os.path.join("data_folder", "dataframe.p")
+    data_path = os.path.join("server", "data_folder", "dataframe.p")
     t1 = pd.read_csv(data)
     bins = [f"LiveBin_{x}dM" for x in range(1, 17)]
     tpm10 = t1[[x for x in bins]].dropna().sum(axis=1)
@@ -193,19 +193,19 @@ def main(fileBuffer):
     print(f"Time for completion: {t3-t1}")
 
     #########################################
-    with open("test.json", "wt") as f:
-        f.write(str(rois_per_day))
+    # with open("test.json", "wt") as f:
+    #     f.write(str(rois_per_day))
 
     # pprint(rois_per_day)
-    # pickle.dump(
-    #     rois_per_day, open(os.path.join("server","data_folder", "rois.p"), "wb")
-    # )
+    pickle.dump(
+        rois_per_day, open(os.path.join("server","data_folder", "rois.p"), "wb")
+    )
 
 
 
 if __name__ == "__main__":
     os.chdir(os.path.join("server", "server"))
-    freeze_support()
+    # freeze_support()
     path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\VAQIIS---Group-2\\data_extraction\\extracted_Data_TOA5_fasttable1_2019_10_29_1029.csv"
     with open(path, "rt") as f:
         main(f)

@@ -131,6 +131,13 @@ def convert_sr(
     return geom
 
 
+def _rois(day):
+    rois_per_level = []
+    for cluster in day:
+        rois_per_level.append(create_regons_of_interest_from_level(cluster))
+    return rois_per_level
+
+
 def main(fileBuffer):
     data = extract_data(fileBuffer)
 
@@ -180,13 +187,16 @@ def main(fileBuffer):
 
     t2 = time.perf_counter()
     print(f"Time for clustering: {t2-t1}")
+    
+        
+    with ProcessPoolExecutor() as executer:
+        rois_per_day_list = executer.map(_rois, day_cluster.values())
+    rois_per_day_list = list(rois_per_day_list)
 
-    rois_per_day = {}
-    for day in day_cluster.keys():
-        rois_per_level = []
-        for cluster in day_cluster.get(day):
-            rois_per_level.append(create_regons_of_interest_from_level(cluster))
-        rois_per_day[day] = rois_per_level
+    # for day in day_cluster.keys():
+    #     rois_per_day_list = [_rois(x) for x in day_cluster.values()]
+
+    rois_per_day = {k:v for k,v in zip(day_cluster.keys(), rois_per_day_list)}
 
     t3 = time.perf_counter()
     print(f"Time for rois: {t3-t2}")
@@ -204,7 +214,7 @@ def main(fileBuffer):
 
 
 if __name__ == "__main__":
-    os.chdir(os.path.join("server", "server"))
+    os.chdir(os.path.join("server"))
     # freeze_support()
     path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\VAQIIS---Group-2\\data_extraction\\extracted_Data_TOA5_fasttable1_2019_10_29_1029.csv"
     with open(path, "rt") as f:

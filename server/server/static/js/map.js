@@ -13,7 +13,9 @@ var osmlayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 	maxZoom: 18
 }).addTo(map);
 
-var rois = [];
+var rois = {};
+var dates = [];
+
 var LayerGroupRois = new L.LayerGroup();
 LayerGroupRois.addTo(map);
 var routeLayer = new L.LayerGroup();
@@ -30,23 +32,43 @@ function addToMap(geojson, LayerGroup, color) {
 }
 
 $(document).ready(function () {
-	let level = $("#slider").val();
-	$("#sliderValue").text(level);
+	let level = $("#levelslider").val();
+	$("#levelsliderValue").text(level);
 	$.ajax({
 		type: "GET",
 		url: "/getrois",
 		success: function (response) {
 			rois = response.data;
-			addToMap(rois[level], LayerGroupRois, "#c82b00");
+			console.log(rois);
+			
+			dates = Object.keys(rois);
+			console.log(dates);
+			
+			$("#timeslider").attr({
+				max: dates.length-1
+			});
+			$("#timesliderValue").text(dates[0]);
+			addToMap(rois[dates[0]][level], LayerGroupRois, "#c82b00");
 		}
 	});
 });
 
-$(document).on('input', '#slider', function () {
-	$("#sliderValue").text(this.value);
+$(document).on('input', '#levelslider', function () {
+	$("#levelsliderValue").text(this.value);
 	let level = $(this).val();
-	addToMap(rois[level], LayerGroupRois, "#c82b00");
+	let time = $("#timeslider").val();
+	
+	addToMap(rois[dates[time]][level], LayerGroupRois, "#c82b00");
 });
+$(document).on('input', '#timeslider', function () {
+	$("#timesliderValue").text(dates[this.value]);
+	let time = $(this).val();
+	let level = $("#levelslider").val();
+	
+	addToMap(rois[dates[time]][level], LayerGroupRois, "#c82b00");
+});
+
+
 
 function createButton(label, container, id) {
 	var btn = L.DomUtil.create('button', '', container);
@@ -143,7 +165,7 @@ $(document).ready(function () {
 			} else {
 				finish = toCoordinates(finish);
 			}
-			let level = $("#slider").val();
+			let level = $("#levelslider").val();
 			let data = {
 				"coordinates": [
 					start, finish

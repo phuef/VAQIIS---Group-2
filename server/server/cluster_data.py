@@ -3,10 +3,7 @@ import math
 import os
 import pickle
 import time
-from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
-from multiprocessing import freeze_support
-from pprint import pprint
 
 import hdbscan
 import numpy as np
@@ -14,21 +11,56 @@ import pandas as pd
 import sklearn.cluster as cluster
 from osgeo import ogr, osr
 
+from concurrent.futures import ProcessPoolExecutor
+# from multiprocessing import freeze_support
+# from pprint import pprint
 
-def devide_by_time(data: np.ndarray, timestamp_index:int, time_range_hours:int):
-    print(datetime.fromtimestamp(data[timestamp_index]))
 
-def extract_data(data) -> np.ndarray:
+
+def extract_data(data) -> pd.DataFrame:
+    data_path = os.path.join("server", "data_folder", "dataframe.p")
     t1 = pd.read_csv(data)
-    bins = [f"LiveBin_{x}dM" for x in range(1,17)]
-    tpm10 = t1[[x for x in bins]].sum(axis=1)
-    tOut = pd.DataFrame({"TIMESTAMP": t1["TIMESTAMP"], "lat": t1["lat"], "lon": t1["lon"], "pm10": tpm10})
-    return tOut.to_numpy()
+    bins = [f"LiveBin_{x}dM" for x in range(1, 17)]
+    tpm10 = t1[[x for x in bins]].dropna().sum(axis=1)
+    tOut = pd.DataFrame(
+        {
+            "TIMESTAMP": t1["TIMESTAMP"],
+            "lat": t1["lat"],
+            "lon": t1["lon"],
+            "pm10": tpm10,
+        }
+    ).dropna()
+
+    try:
+        tOld = pd.read_pickle(data_path)
+        tNew = (
+            tOut.append(tOld, ignore_index=True)
+            .drop_duplicates()
+            .sort_values("TIMESTAMP")
+        )
+        tNew.to_pickle(data_path)
+    except:
+        tOut.sort_values("TIMESTAMP").to_pickle(data_path)
+        tNew = tOut
+
+    return tNew
 
 
-def seperate_into_levels(data: np.ndarray, level_index: int):
-    min_val = data.T[level_index].min()
-    max_val = data.T[level_index].max()
+def devide_by_time(data: pd.DataFrame) -> dict:
+    data["TIMESTAMP"] = pd.to_datetime(data["TIMESTAMP"])
+    allDays = data["TIMESTAMP"].dt.normalize().unique()
+    numDays = len(allDays)
+    seperation = {}
+    for day in allDays:
+        rows_to_day = data[data.TIMESTAMP >= day]
+        seperation[day] = rows_to_day
+
+    return seperation
+
+
+def seperate_into_levels(data: pd.DataFrame) -> list:
+    min_val = data["pm10"].min()
+    max_val = data["pm10"].max()
     div = (max_val - min_val) / 10
     steps = []
     levels = []
@@ -37,20 +69,20 @@ def seperate_into_levels(data: np.ndarray, level_index: int):
         steps.append(i * div)
 
     for i, step in enumerate(steps):
-        levels.append(data[np.where(data.T[level_index] >= step + min_val)])
+        level = data[data.pm10 >= step + min_val].reset_index(drop=True)
+        levels.append(level)
 
     return levels
 
 
 def create_regons_of_interest_from_level(
-    seperation: list, lat_long: tuple = (1, 2), buffer: float = 5
+    seperation: list, buffer: float = 5
 ) -> dict:
-    lat, lng = lat_long
 
-    def singel_region(cluster: np.ndarray) -> ogr.Geometry:
+    def singel_region(cluster: pd.DataFrame) -> ogr.Geometry:
         multipoint = ogr.Geometry(ogr.wkbMultiPoint)
-        for row in cluster:
-            point = ogr.CreateGeometryFromWkt(f"POINT ({row[lng]} {row[lat]})")
+        for _, row in cluster.iterrows():
+            point = ogr.CreateGeometryFromWkt(f"POINT ({row['lon']} {row['lat']})")
             multipoint.AddGeometry(point)
 
         multipoint = convert_sr(multipoint)
@@ -71,14 +103,14 @@ def create_regons_of_interest_from_level(
     return multipolygon
 
 
-def spatial_cluster(level, lat=1, lon=2) -> np.ndarray:
-    coordinates = level.T[[lat, lon]]
-    lables = hdbscan.HDBSCAN(min_cluster_size=5).fit_predict(coordinates.T)
+def spatial_cluster(level: pd.DataFrame) -> list:
+    coordinates = level[["lat", "lon"]].to_numpy()
+    lables = hdbscan.HDBSCAN(min_cluster_size=2).fit_predict(coordinates)
     num_lables = np.unique(lables).max()
     seperation = []
     for i in range(num_lables):
         ids = np.where(lables == i)
-        seperation.append(level[ids])
+        seperation.append(level.loc[ids])
 
     return seperation
 
@@ -98,57 +130,20 @@ def convert_sr(
 
     return geom
 
-# def convex_hull(points):
-#     """Computes the convex hull of a set of 2D points.
-
-#     Input: an iterable sequence of (x, y) pairs representing the points.
-#     Output: a list of vertices of the convex hull in counter-clockwise order,
-#       starting from the vertex with the lexicographically smallest coordinates.
-#     Implements Andrew's monotone chain algorithm. O(n log n) complexity.
-#     """
-
-#     # Sort the points lexicographically (tuples are compared lexicographically).
-#     # Remove duplicates to detect the case we have just one unique point.
-#     points = sorted(set(points))
-
-#     # Boring case: no points or a single point, possibly repeated multiple times.
-#     if len(points) <= 1:
-#         return points
-
-#     # 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
-#     # Returns a positive value, if OAB makes a counter-clockwise turn,
-#     # negative for clockwise turn, and zero if the points are collinear.
-#     def cross(o, a, b):
-#         return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
-
-#     # Build lower hull 
-#     lower = []
-#     for p in points:
-#         while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
-#             lower.pop()
-#         lower.append(p)
-
-#     # Build upper hull
-#     upper = []
-#     for p in reversed(points):
-#         while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
-#             upper.pop()
-#         upper.append(p)
-
-#     # Concatenation of the lower and upper hulls gives the convex hull.
-#     # Last point of each list is omitted because it is repeated at the beginning of the other list. 
-#     return lower[:-1] + upper[:-1]
-
-# # Example: convex hull of a 10-by-10 grid.
-# assert convex_hull([(i//10, i%10) for i in range(100)]) == [(0, 0), (9, 0), (9, 9), (0, 9)]
-
 
 def main(fileBuffer):
     data = extract_data(fileBuffer)
 
     t0 = time.perf_counter()
 
-    levels = seperate_into_levels(data, 3)
+    time_seperation = devide_by_time(data)
+
+    levels_per_day = {}
+    for day in time_seperation.keys():
+        date = str(datetime.utcfromtimestamp(day.astype('O')/1e9).date())
+        levels_per_day[date] = seperate_into_levels(time_seperation.get(day))
+
+    # print(levels)
 
     #########################################
 
@@ -176,16 +171,22 @@ def main(fileBuffer):
     t1 = time.perf_counter()
     print(f"Time for leveling: {t1-t0}")
 
-    level_cluster = []
-    for level in levels:
-        level_cluster.append(spatial_cluster(level))
+    day_cluster = {}
+    for day in levels_per_day.keys():
+        level_cluster = []
+        for level in levels_per_day.get(day):
+            level_cluster.append(spatial_cluster(level))
+        day_cluster[day] = level_cluster
 
     t2 = time.perf_counter()
     print(f"Time for clustering: {t2-t1}")
 
-    rois_per_level = []
-    for cluster in level_cluster:
-        rois_per_level.append(create_regons_of_interest_from_level(cluster))
+    rois_per_day = {}
+    for day in day_cluster.keys():
+        rois_per_level = []
+        for cluster in day_cluster.get(day):
+            rois_per_level.append(create_regons_of_interest_from_level(cluster))
+        rois_per_day[day] = rois_per_level
 
     t3 = time.perf_counter()
     print(f"Time for rois: {t3-t2}")
@@ -193,13 +194,18 @@ def main(fileBuffer):
 
     #########################################
     # with open("test.json", "wt") as f:
-    #     f.write(str(rois_per_level[0]))
-    pickle.dump(rois_per_level, open(os.path.join("server", "data_folder", "rois.p"), "wb"))
-    
+    #     f.write(str(rois_per_day))
+
+    # pprint(rois_per_day)
+    pickle.dump(
+        rois_per_day, open(os.path.join("server","data_folder", "rois.p"), "wb")
+    )
+
+
 
 if __name__ == "__main__":
     os.chdir(os.path.join("server", "server"))
-    freeze_support()
-    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\Daten\\cluster_dataset\\2019-12-19_fasttable.csv"
+    # freeze_support()
+    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\VAQIIS---Group-2\\data_extraction\\extracted_Data_TOA5_fasttable1_2019_10_29_1029.csv"
     with open(path, "rt") as f:
         main(f)

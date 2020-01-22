@@ -65,7 +65,7 @@ def deleteUnneccessaryRows(filename):
         for row in reader:
             lines.append(row)
             for field in row:
-                if field=="TS" or field=="0.0":
+                if field=="TS" or field=="Smp":
                     lines.remove(row)
                     break
     with open(filename, 'w', newline='') as writeFile:
@@ -73,15 +73,17 @@ def deleteUnneccessaryRows(filename):
         writer.writerows(lines)
 
 
-# dataExtractionCSV('2019-12-19_fasttable.csv')
-# datExtraction('TOA5_fasttable2_2019_10_29_0939')
-# datExtraction('TOA5_fasttable1_2019_10_29_1029')
-# datExtraction('TOA5_fasttable2_2019_10_29_1000')
-# datExtraction('TOA5_fasttable2_2019_10_29_1100')
-# datExtraction('TOA5_fasttable3_2019_10_29_1200')
-# datExtraction('TOA5_fasttable4_2019_10_30_1336')
-# datExtraction('TOA5_fasttable4_2019_10_30_1400')
-# datExtraction('TOA5_fasttable5_2019_10_31_0958')
-# datExtraction('TOA5_fasttable6_2019_11_14_0941')
-# datExtraction('TOA5_fasttable9_2019_11_21_0954')
-# datExtraction('TOA5_fasttable10_2019_11_21_1200')
+if __name__ == "__main__":
+    os.chdir("data_extraction")
+    # dataExtractionCSV('2019-12-19_fasttable.csv')
+    datExtraction('TOA5_fasttable2_2019_10_29_0939')
+    datExtraction('TOA5_fasttable1_2019_10_29_1029')
+    datExtraction('TOA5_fasttable2_2019_10_29_1000')
+    datExtraction('TOA5_fasttable2_2019_10_29_1100')
+    datExtraction('TOA5_fasttable3_2019_10_29_1200')
+    datExtraction('TOA5_fasttable4_2019_10_30_1336')
+    datExtraction('TOA5_fasttable4_2019_10_30_1400')
+    datExtraction('TOA5_fasttable5_2019_10_31_0958')
+    datExtraction('TOA5_fasttable6_2019_11_14_0941')
+    datExtraction('TOA5_fasttable9_2019_11_21_0954')
+    datExtraction('TOA5_fasttable10_2019_11_21_1200')

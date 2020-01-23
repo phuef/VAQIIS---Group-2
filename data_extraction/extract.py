@@ -5,7 +5,7 @@ import os
 def getValues(filePath):
     with open(filePath) as csv_file:
         daten = csv.reader(csv_file.readlines())
-        next(daten, "NAN")
+        next(daten, "NaN")
         elements = []
         for x in daten:
             elements.append(x)
@@ -53,7 +53,7 @@ def getValues(filePath):
                             counter=counter+1
                         else:
                             if bin1[counter]!=None or bin2[counter]!=None or bin3[counter]!=None or bin4[counter]!=None or bin5[counter]!=None or bin6[counter]!=None or bin7[counter]!=None or bin8[counter]!=None or bin9[counter]!=None or bin10[counter]!=None or bin11[counter]!=None or bin12[counter]!=None or bin13[counter]!=None or bin14[counter]!=None or bin15[counter]!=None or bin16[counter]!=None:
-                                    if bin1[counter]=="NAN"  or bin2[counter]=="NAN" or bin3[counter]=="NAN" or bin4[counter]=="NAN" or bin5[counter]=="NAN" or bin6[counter]=="NAN" or bin7[counter]=="NAN" or bin8[counter]=="NAN" or bin9[counter]=="NAN" or bin10[counter]=="NAN" or bin11[counter]=="NAN" or bin12[counter]=="NAN" or bin13[counter]=="NAN" or bin14[counter]=="NAN" or bin15[counter]=="NAN" or bin16[counter]=="NAN":
+                                    if bin1[counter]=="NaN"  or bin2[counter]=="NaN" or bin3[counter]=="NaN" or bin4[counter]=="NaN" or bin5[counter]=="NaN" or bin6[counter]=="NaN" or bin7[counter]=="NaN" or bin8[counter]=="NaN" or bin9[counter]=="NaN" or bin10[counter]=="NaN" or bin11[counter]=="NaN" or bin12[counter]=="NaN" or bin13[counter]=="NaN" or bin14[counter]=="NaN" or bin15[counter]=="NaN" or bin16[counter]=="NaN":
                                         print("Not all Bins have Values")
                                         counter=counter+1
                                     else:

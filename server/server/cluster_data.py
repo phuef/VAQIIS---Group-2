@@ -20,7 +20,7 @@ from concurrent.futures import ProcessPoolExecutor
 def extract_data(data) -> pd.DataFrame:
     data_path = os.path.join("server", "data_folder", "dataframe.p")
     t1 = pd.read_csv(data)
-    bins = [f"LiveBin_{x}dM" for x in range(1, 17)]
+    bins = ["LiveBin_{}dM".format(x) for x in range(1, 17)]
     tpm10 = t1[[x for x in bins]].dropna().sum(axis=1)
     tOut = pd.DataFrame(
         {
@@ -82,7 +82,7 @@ def create_regons_of_interest_from_level(
     def singel_region(cluster: pd.DataFrame) -> ogr.Geometry:
         multipoint = ogr.Geometry(ogr.wkbMultiPoint)
         for _, row in cluster.iterrows():
-            point = ogr.CreateGeometryFromWkt(f"POINT ({row['lon']} {row['lat']})")
+            point = ogr.CreateGeometryFromWkt("POINT ({} {})".format(row['lon'], row['lat']))
             multipoint.AddGeometry(point)
 
         multipoint = convert_sr(multipoint)
@@ -99,7 +99,7 @@ def create_regons_of_interest_from_level(
             roi = json.loads(singel_region(cluster).ExportToJson())
             multipolygon["coordinates"].append(roi["coordinates"])
         except KeyError:
-            print(f"Error at cluster {i}")
+            print("Error at cluster {}".format(i))
     return multipolygon
 
 
@@ -176,7 +176,7 @@ def main(fileBuffer):
     #########################################
 
     t1 = time.perf_counter()
-    print(f"Time for leveling: {t1-t0}")
+    print("Time for leveling: {}".format(t1-t0))
 
     day_cluster = {}
     for day in levels_per_day.keys():
@@ -186,7 +186,7 @@ def main(fileBuffer):
         day_cluster[day] = level_cluster
 
     t2 = time.perf_counter()
-    print(f"Time for clustering: {t2-t1}")
+    print("Time for clustering: {}".format(t2-t1))
     
         
     with ProcessPoolExecutor() as executer:
@@ -199,8 +199,8 @@ def main(fileBuffer):
     rois_per_day = {k:v for k,v in zip(day_cluster.keys(), rois_per_day_list)}
 
     t3 = time.perf_counter()
-    print(f"Time for rois: {t3-t2}")
-    print(f"Time for completion: {t3-t1}")
+    print("Time for rois: {}".format(t3-t2))
+    print("Time for completion: {}".format(t3-t1))
 
     #########################################
     # with open("test.json", "wt") as f:

@@ -1,6 +1,5 @@
 cycler==0.10.0
 Flask==1.1.1
-Flask-SQLAlchemy==2.4.1
 hdbscan==0.8.23
 numpy==1.17.3
 pandas==0.25.3

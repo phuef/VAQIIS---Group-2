@@ -12,7 +12,7 @@ import sklearn.cluster as cluster
 from osgeo import ogr, osr
 
 from concurrent.futures import ProcessPoolExecutor
-# from multiprocessing import freeze_support
+import multiprocessing as mp
 # from pprint import pprint
 
 
@@ -22,6 +22,7 @@ def extract_data(data) -> pd.DataFrame:
     t1 = pd.read_csv(data)
     bins = ["LiveBin_{}dM".format(x) for x in range(1, 17)]
     tpm10 = t1[[x for x in bins]].dropna().sum(axis=1)
+    # tpm10.to_csv("test.csv")
     tOut = pd.DataFrame(
         {
             "TIMESTAMP": t1["TIMESTAMP"],
@@ -59,18 +60,16 @@ def devide_by_time(data: pd.DataFrame) -> dict:
 
 
 def seperate_into_levels(data: pd.DataFrame) -> list:
-    min_val = data["pm10"].min()
-    max_val = data["pm10"].max()
-    div = (max_val - min_val) / 10
     steps = []
     levels = []
 
+    
     for i in range(0, 10):
-        steps.append(i * div)
+        steps.append(i*10)
 
     for i, step in enumerate(steps):
-        level = data[data.pm10 >= step + min_val].reset_index(drop=True)
-        levels.append(level)
+        level = data[data.pm10 >= step].reset_index(drop=True)
+        levels.append(level) 
 
     return levels
 
@@ -182,14 +181,17 @@ def main(fileBuffer):
     for day in levels_per_day.keys():
         level_cluster = []
         for level in levels_per_day.get(day):
-            level_cluster.append(spatial_cluster(level))
+            if not level.empty:
+                level_cluster.append(spatial_cluster(level))
+            else:
+                level_cluster.append([])
         day_cluster[day] = level_cluster
 
     t2 = time.perf_counter()
     print("Time for clustering: {}".format(t2-t1))
     
-        
-    with ProcessPoolExecutor() as executer:
+    numProcesses = len(day_cluster.keys())
+    with ProcessPoolExecutor(max_workers=numProcesses) as executer:
         rois_per_day_list = executer.map(_rois, day_cluster.values())
     rois_per_day_list = list(rois_per_day_list)
 
@@ -216,6 +218,6 @@ def main(fileBuffer):
 if __name__ == "__main__":
     os.chdir(os.path.join("server"))
     # freeze_support()
-    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\VAQIIS---Group-2\\data_extraction\\extracted_Data_TOA5_fasttable1_2019_10_29_1029.csv"
+    path = "C:\\Users\\hfock\\Documents\\Uni\\7. Semester\\Studienprojekt\\VAQIIS---Group-2\\data_extraction\\extracted_Data_TOA5_fasttable2_2019_10_29_1100.csv"
     with open(path, "rt") as f:
         main(f)

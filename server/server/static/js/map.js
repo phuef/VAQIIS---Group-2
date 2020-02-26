@@ -1,3 +1,5 @@
+
+// create the map
 var mapOptions = {
 	center: [51.96, 7.60],
 	zoom: 13,
@@ -16,6 +18,7 @@ var osmlayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 var rois = {};
 var dates = [];
 
+
 var LayerGroupRois = new L.LayerGroup();
 LayerGroupRois.addTo(map);
 var routeLayer = new L.LayerGroup();
@@ -31,28 +34,37 @@ function addToMap(geojson, LayerGroup, color) {
 	LayerGroup.addLayer(geometry);
 }
 
+
+// load data and display on the map
 $(document).ready(function () {
 	let level = $("#levelslider").val();
-	$("#levelsliderValue").text(level);
+	let levelText = level == 10 ? "no data is beeing considered" : "\u2265" + level*10 + " pM10";
+	$("#levelsliderValue").text(levelText);
 	$.ajax({
 		type: "GET",
 		url: "/getrois",
 		success: function (response) {
-			rois = response.data;
-			console.log(rois);
+			try {
+				rois = response.data;
+				console.log(rois);
 
-			dates = Object.keys(rois);
-			console.log(dates);
+				dates = Object.keys(rois);
+				console.log(dates);
 
-			$("#timeslider").attr({
-				max: dates.length - 1
-			});
-			$("#timesliderValue").text(dates[0]);
-			addToMap(rois[dates[0]][level], LayerGroupRois, "#c82b00");
+				$("#timeslider").attr({
+					max: dates.length - 1
+				});
+				$("#timesliderValue").text(dates[0]);
+				addToMap(rois[dates[0]][level], LayerGroupRois, "#c82b00");
+			} catch {
+				console.log("No Data");
+
+			}
 		}
 	});
 });
 
+// information that request is loading
 $(document).ajaxStart(function () {
 	$("#ajaxLoad").show();
 });
@@ -61,9 +73,11 @@ $(document).ajaxStop(function () {
 	$("#ajaxLoad").hide();
 });
 
+// change polygons and text on map depending on the position of the slider
 $(document).on('input', '#levelslider', function () {
-	$("#levelsliderValue").text(this.value);
 	let level = $(this).val();
+	let levelText = level == 10 ? "no data is beeing considered" : "\u2265" + level*10 + " pM10";
+	$("#levelsliderValue").text(levelText);
 	let time = $("#timeslider").val();
 
 	addToMap(rois[dates[time]][level], LayerGroupRois, "#c82b00");
@@ -77,7 +91,7 @@ $(document).on('input', '#timeslider', function () {
 });
 
 
-
+// display buttons on map when clicking on map
 function createButton(label, container, id) {
 	var btn = L.DomUtil.create('button', '', container);
 	btn.setAttribute('type', 'button');
@@ -108,6 +122,7 @@ map.on('click', function (e) {
 	});
 });
 
+// convert coordinate to geocode address
 function setAddress(pos, selector) {
 	let input = pos.latlng;
 	$.ajax({
@@ -133,14 +148,14 @@ function setAddress(pos, selector) {
 	});
 }
 
+// submit the data to the openrouteservice api and precess results
 $(document).ready(function () {
 	$("#submit").click(function (e) {
 		let start = $("#start").val();
 		let finish = $("#finish").val();
 		let profile = $("input[name='transport']:checked").val();
 
-
-		if (start != null && finish != null) {
+		if (start != "" && finish != "") {
 			var toCoordinates = function (coordString) {
 				let sep = coordString.split(",");
 				let lat = parseFloat(sep[0]);
@@ -175,15 +190,25 @@ $(document).ready(function () {
 			}
 			let level = $("#levelslider").val();
 			let time = $("#timeslider").val();
-			let data = {
-				"coordinates": [
-					start, finish
-				],
-				"options": {
-					"avoid_polygons": rois[dates[time]][level]
+			var data = null;
+			try {
+				data = {
+					"coordinates": [
+						start, finish
+					],
+					"options": {
+						"avoid_polygons": rois[dates[time]][level]
+					}
 				}
+				console.log(data);
+			} catch {
+				data = {
+					"coordinates": [
+						start, finish
+					]
+				}
+				console.log(data);
 			}
-			console.log(data);
 
 			$.ajax({
 				type: "POST",
@@ -211,6 +236,7 @@ $(document).ready(function () {
 	});
 });
 
+// add route to map with instructions
 function addRouteFeatures(geojson) {
 	addToMap(geojson.features[0], routeLayer, "#00c800");
 
@@ -244,3 +270,10 @@ function addRouteFeatures(geojson) {
 	map.flyToBounds(bbox);
 
 }
+
+// hide tutorial
+$(document).ready(function () {
+	$("#inputStop").click(function (e) { 
+		$(this).hide();
+	});
+});

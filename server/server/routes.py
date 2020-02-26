@@ -18,8 +18,11 @@ def index():
 
 @app.route("/getrois", methods=["GET"])
 def getrois():
-    levels = pickle.load(open(os.path.join("server", "data_folder", "rois.p"), "rb"))
-    return {"status": "OK", "data": levels}
+    try:
+        levels = pickle.load(open(os.path.join("server", "data_folder", "rois.p"), "rb"))
+        return {"status": "OK", "data": levels}
+    except FileNotFoundError:
+        return {"status": "OK", "data": []}
 
 @app.route("/upload", methods=["GET"])
 def upload():
